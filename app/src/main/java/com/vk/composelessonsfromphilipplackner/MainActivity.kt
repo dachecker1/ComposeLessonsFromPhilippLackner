@@ -3,6 +3,7 @@ package com.vk.composelessonsfromphilipplackner
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,16 +28,22 @@ class MainActivity : ComponentActivity() {
             }
             val size by animateDpAsState(
                 targetValue = stateSize,
-                keyframes {
-                    durationMillis = 5000
-                    stateSize at 0 with LinearEasing
-                    stateSize * 1.5F at 1000 with FastOutLinearInEasing
-                    stateSize * 2f at 5000
-                }
+                tween(
+                    durationMillis = 1000
+                )
+            )
+            val infiniteTransition = rememberInfiniteTransition()
+            val color by infiniteTransition.animateColor(
+                initialValue = Color.Red,
+                targetValue = Color.Green,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 2000),
+                    repeatMode = RepeatMode.Reverse
+                )
             )
             Box(modifier = Modifier
                 .size(size)
-                .background(Color.Red),
+                .background(color),
                 contentAlignment = Alignment.Center
             ) {
                 Button(onClick = {
