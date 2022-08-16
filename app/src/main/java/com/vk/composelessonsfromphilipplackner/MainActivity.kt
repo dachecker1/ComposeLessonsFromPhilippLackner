@@ -27,9 +27,12 @@ class MainActivity : ComponentActivity() {
             }
             val size by animateDpAsState(
                 targetValue = stateSize,
-                spring(
-                    Spring.DampingRatioHighBouncy
-                )
+                keyframes {
+                    durationMillis = 5000
+                    stateSize at 0 with LinearEasing
+                    stateSize * 1.5F at 1000 with FastOutLinearInEasing
+                    stateSize * 2f at 5000
+                }
             )
             Box(modifier = Modifier
                 .size(size)
