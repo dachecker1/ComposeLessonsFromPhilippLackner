@@ -1,79 +1,165 @@
 package com.vk.composelessonsfromphilipplackner
 
 import android.os.Bundle
-import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Surface(color = Color(0xFF2020202), modifier = Modifier.fillMaxSize()) {
-                Navigation()
+            val navController = rememberNavController()
+            Scaffold(
+                bottomBar = {
+                    BottomNavigationBar(
+                        items = listOf(
+                            BottomNavItem(
+                                name = "Home",
+                                route = "home",
+                                icon = Icons.Default.Home
+                            ),
+                            BottomNavItem(
+                                name = "Chat",
+                                route = "chat",
+                                icon = Icons.Default.Create,
+                                badgeCount = 23
+                            ),
+                            BottomNavItem(
+                                name = "Settings",
+                                route = "settings",
+                                icon = Icons.Default.Settings,
+                                badgeCount = 1
+                            )
+                        ),
+                        navController = navController,
+                        onItemClick = {
+                            navController.navigate(it.route)
+                        }
+                    )
+                }
+            ) {
+
             }
+            Navigation(navController = navController)
+        }
+    }
+}
+
+
+@Composable
+fun Navigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen()
+        }
+        composable("chat") {
+            ChatScreen()
+        }
+        composable("settings") {
+            SettingsScreen()
         }
     }
 }
 
 @Composable
-fun Navigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "splash_screen") {
-        composable("splash_screen") {
-            SplashScreen(navController = navController)
-        }
-        composable("main_screen") {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "This is main screen", color = Color.White)
-            }
-        }
-    }
-}
-
-@Composable
-fun SplashScreen(navController: NavController) {
-    val scale = remember {
-        androidx.compose.animation.core.Animatable(0f)
-    }
-    LaunchedEffect(key1 = true) {
-        scale.animateTo(
-            targetValue = 0.9f,
-            animationSpec = tween(
-                durationMillis = 1000,
-                easing = {
-                    OvershootInterpolator(2f).getInterpolation(it)
+fun BottomNavigationBar(
+    items: List<BottomNavItem>,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    onItemClick: (BottomNavItem) -> Unit,
+) {
+    val backStackEntry = navController.currentBackStackEntryAsState()
+    BottomNavigation(
+        modifier = modifier,
+        backgroundColor = Color.DarkGray,
+        elevation = 5.dp
+    ) {
+        items.forEach { item ->
+            val selected = item.route == backStackEntry.value?.destination?.route
+            BottomNavigationItem(
+                selected = selected,
+                selectedContentColor = Color.Green,
+                unselectedContentColor = Color.Gray,
+                onClick = {
+                    onItemClick(item)
+                },
+                icon = {
+                    Column(horizontalAlignment = CenterHorizontally) {
+                        if (item.badgeCount > 0) {
+                            BadgedBox(badge = {
+                                Text(
+                                    text = item.badgeCount.toString(),
+                                    modifier = Modifier
+                                        .background(Color.Red)
+                                        .padding(3.dp)
+                                )
+                            }) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.name
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.name
+                            )
+                        }
+                        if (selected) {
+                            Text(
+                                text = item.name,
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
                 }
             )
-        )
-        delay(3000L)
-        navController.navigate("main_screen")
+        }
     }
-    Box(contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo",
-            modifier = Modifier.scale(scale.value)
-        )
+}
+
+@Composable
+fun HomeScreen() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Home Screen")
+    }
+}
+
+@Composable
+fun ChatScreen() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Chat Screen")
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Settings Screen")
     }
 }
